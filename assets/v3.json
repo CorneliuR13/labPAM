@@ -1,0 +1,82 @@
+{
+  "wines_by": [
+    {
+      "tag": "type",
+      "name": "Type"
+    },
+    {
+      "tag": "style",
+      "name": "Style"
+    },
+    {
+      "tag": "country",
+      "name": "Countries"
+    },
+    {
+      "tag": "grape",
+      "name": "Grape"
+    }
+  ],
+  "carousel": [
+    {
+      "name": "Chateau Margaux 2015",
+      "image": "https://cdn11.bigcommerce.com/s-pjvamvjhqj/images/stencil/1280x1280/products/16121/6941/XX-2015-Chateau-Margaux-__04839.1701212492.jpg?c=1",
+      "critic_score": 97,
+      "bottle_size": "750 ml",
+      "price_usd": 750,
+      "type": "red",
+      "from": {
+        "country": "France 🇫🇷",
+        "city": "Bordeaux"
+      }
+    },
+    {
+      "name": "Cloudy Bay Sauvignon Blanc 2020",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSupPmOyZBHA2Kl5y68IrP3xRhIgaueNHLoag&s",
+      "critic_score": 92,
+      "bottle_size": "750 ml",
+      "price_usd": 30,
+      "type": "white",
+      "from": {
+        "country": "New Zealand 🇳🇿",
+        "city": "Marlborough"
+      }
+    },
+    {
+      "name": "Moet & Chandon Imperial Brut",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFmy5_kj268mP_NsTweryaHSoFHHACINc8rQ&s",
+      "critic_score": 89,
+      "bottle_size": "750 ml",
+      "price_usd": 50,
+      "type": "sparkling",
+      "from": {
+        "country": "France 🇫🇷",
+        "city": "Champagne"
+      }
+    },
+    {
+      "name": "Penfolds Grange 2016",
+      "image": "https://thebarrel.au/cdn/shop/files/Penfold-Grange-2016.png?v=1684999674",
+      "critic_score": 98,
+      "bottle_size": "750 ml",
+      "price_usd": 850,
+      "type": "red",
+      "from": {
+        "country": "Australia 🇦🇺",
+        "city": "Barossa Valley"
+      }
+    },
+    {
+      "name": "Gavi di Gavi La Scolca 2019",
+      "image": "https://bottleofitaly.com/cdn/shop/products/gavi-la-scolca--base-cl75-2019-bottle-of-italy.jpg?v=1626358239",
+      "critic_score": 90,
+      "bottle_size": "750 ml",
+      "price_usd": 40,
+      "type": "white",
+      "from": {
+        "country": "Italy 🇮🇹",
+        "city": "Piedmont"
+      }
+    }
+  ]
+}

@@ -1,19 +1,31 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  Future<Map<String, dynamic>> loadWineData() async {
+    String jsonString = await rootBundle.loadString('assets/v3.json');
+    return json.decode(jsonString);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: WineShopScreen(),
+      debugShowCheckedModeBanner: false,
+      home: WineShopScreen(loadWineData: loadWineData),
     );
   }
 }
 
 class WineShopScreen extends StatelessWidget {
+  final Future<Map<String, dynamic>> Function() loadWineData;
+
+  WineShopScreen({required this.loadWineData});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,33 +57,29 @@ class WineShopScreen extends StatelessWidget {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(
-                right: 16.0), // Adjust the right padding as needed
+            padding: const EdgeInsets.only(right: 16.0),
             child: Stack(
-              clipBehavior:
-                  Clip.none, // Ensures the badge is visible outside the icon
+              clipBehavior: Clip.none,
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors
-                        .grey[200], // Background color for the icon button
-                    borderRadius: BorderRadius.circular(8), // Rounded corners
-                    border: Border.all(color: Colors.grey), // Border color
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey),
                   ),
                   child: IconButton(
-                    icon: Icon(Icons.notifications_none,
-                        color: Colors.grey), // Grey icon
+                    icon: Icon(Icons.notifications_none, color: Colors.grey),
                     onPressed: () {},
                   ),
                 ),
                 Positioned(
-                  right: -4, // Slightly offset the position to the top-right
+                  right: -4,
                   top: -4,
                   child: Container(
                     padding: EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: Colors.red,
-                      shape: BoxShape.circle, // Circular badge
+                      shape: BoxShape.circle,
                     ),
                     constraints: BoxConstraints(
                       minWidth: 16,
@@ -79,12 +87,8 @@ class WineShopScreen extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        '12', // Notification count
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                        ),
-                        textAlign: TextAlign.center,
+                        '12',
+                        style: TextStyle(color: Colors.white, fontSize: 10),
                       ),
                     ),
                   ),
@@ -96,116 +100,104 @@ class WineShopScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                suffixIcon: Icon(Icons.mic),
-                hintText: 'Search',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Shop wines by',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                WineFilterButton(label: 'Type', isActive: true), // Red button
-                WineFilterButton(
-                    label: 'Style', isActive: false), // Grey button
-                WineFilterButton(
-                    label: 'Countries', isActive: false), // Grey button
-                WineFilterButton(
-                    label: 'Grape', isActive: false), // Grey button
-              ],
-            ),
-            SizedBox(height: 16),
-            // Wine categories section
-            Text(
-              'Wine Categories',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: loadWineData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error loading data'));
+            } else {
+              final wineData = snapshot.data!;
+              final wines = wineData['carousel'] as List<dynamic>;
+
+              return ListView(
                 children: [
-                  WineCategoryCard(
-                    image: 'images/redwine.png',
-                    title: 'Red wines',
-                    count: 123,
+                  TextField(
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      suffixIcon: Icon(Icons.mic),
+                      hintText: 'Search',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
-                  WineCategoryCard(
-                    image: 'images/whitewine.png',
-                    title: 'White wines',
-                    count: 123,
+                  SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Shop wines by',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
                   ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      WineFilterButton(label: 'Type', isActive: true),
+                      WineFilterButton(label: 'Style', isActive: false),
+                      WineFilterButton(label: 'Countries', isActive: false),
+                      WineFilterButton(label: 'Grape', isActive: false),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Wine Categories',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 16),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        WineCategoryCard(
+                          image: 'images/redwine.png',
+                          title: 'Red wines',
+                          count: 123,
+                        ),
+                        WineCategoryCard(
+                          image: 'images/whitewine.png',
+                          title: 'White wines',
+                          count: 123,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Wine',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text('View all'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  ...wines.map((wine) {
+                    return WineCard(
+                      image: wine['image'] ?? '',
+                      wineName: wine['name'] ?? 'Unknown',
+                      wineType: wine['type'] ?? 'Unknown',
+                      wineDescription:
+                          wine['description'] ?? 'No description available',
+                      winePrice: '₹ ${wine['price_usd'] ?? '0'}',
+                      country:
+                          '${wine['from']['city'] ?? 'Unknown'}, ${wine['from']['country'] ?? 'Unknown'}',
+                      criticScore: '${wine['critic_score'] ?? '0'}/100',
+                    );
+                  }).toList(),
                 ],
-              ),
-            ),
-            SizedBox(height: 16),
-            // Wine list section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Wine',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: Text('View all'),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            WineCard(
-              image: 'images/redbottle.png',
-              wineName: 'Ocone Bozzovich Beneventano Bianco IGT',
-              wineType: 'Red wine',
-              wineDescription: '(Green and Flinty)',
-              winePrice: '₹ 23,256,596',
-              country: 'Champagne, France',
-              criticScore: '94/100',
-            ),
-            WineCard(
-              image: 'images/whitebottle.png',
-              wineName: '2021 Petit Chablis Passy Le Clou',
-              wineType: 'White Wine',
-              wineDescription: '(Green and Flinty)',
-              winePrice: '₹ 23,256,596',
-              country: 'Champagne, France',
-              criticScore: '94/100',
-            ),
-             WineCard(
-              image: 'images/rosebottle.png',
-              wineName: 'Philippe Fontaine Champagne Brut Rose, Rose de Saignee, NV',
-              wineType: 'Sparkling Wine',
-              wineDescription: '(Green and Flinty)',
-              winePrice: '₹ 23,256,596',
-              country: 'Champagne, France',
-              criticScore: '94/100',
-            ),
-             WineCard(
-              image: 'images/cicada.png',
-              wineName: '2021 Cicada`s Sonf Rose',
-              wineType: 'Rose Wine',
-              wineDescription: '(Green and Flinty)',
-              winePrice: '₹ 23,256,596',
-              country: 'Champagne, France',
-              criticScore: '94/100',
-            ),
-          ],
+              );
+            }
+          },
         ),
       ),
     );
@@ -227,12 +219,11 @@ class WineFilterButton extends StatelessWidget {
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             foregroundColor: isActive ? Color(0xFFBE2C55) : Colors.black,
-            backgroundColor: isActive
-                ? Color(0xFFF5DFE5  )
-                : Colors.grey[200], // Text color changes based on button state
+            backgroundColor: isActive ? Color(0xFFF5DFE5) : Colors.grey[200],
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: isActive ? Color(0xFFBE2C55) : Colors.grey),
+              side:
+                  BorderSide(color: isActive ? Color(0xFFBE2C55) : Colors.grey),
             ),
           ),
           onPressed: () {},
@@ -327,11 +318,19 @@ class WineCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                // Replace this URL with your actual wine image
-                Image.asset(
+                Image.network(
                   image,
                   width: 100,
                   height: 150,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 150,
+                      color: Colors.grey[200],
+                      child: Center(
+                        child: Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    );
+                  },
                 ),
                 SizedBox(width: 16),
                 Expanded(
@@ -348,42 +347,45 @@ class WineCard extends StatelessWidget {
                       SizedBox(height: 8),
                       Text.rich(
                         TextSpan(
+                          text: wineType,
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
                           children: [
                             TextSpan(
-                              text: wineType,
+                              text: ' · $country',
                               style: TextStyle(
-                                fontWeight: FontWeight.bold,
                                 color: Colors.black,
-                              ),
-                            ),
-                            TextSpan(
-                              text: wineDescription,
-                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
                                 fontSize: 12,
-                                color: Colors.grey,
                               ),
                             ),
                           ],
                         ),
                       ),
                       SizedBox(height: 8),
-                      Text('From $country'),
-                      SizedBox(height: 16),
+                      Text(
+                        wineDescription,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        winePrice,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
                       Row(
                         children: [
-                          ElevatedButton.icon(
-                            icon: Icon(Icons.favorite_border),
-                            label: Text('Favourite'),
-                            onPressed: () {},
-                          ),
-                          SizedBox(width: 16),
-                          Text(
-                            winePrice,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          Icon(Icons.star, color: Colors.orange, size: 16),
+                          SizedBox(width: 4),
+                          Text(criticScore),
                         ],
                       ),
                     ],
@@ -391,8 +393,6 @@ class WineCard extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            Text('Critics\' Scores: $criticScore'),
           ],
         ),
       ),
